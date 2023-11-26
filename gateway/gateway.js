@@ -1,22 +1,23 @@
 /*******************************************************************/
 /*** Configuration ***/
 /*******************************************************************/
-const serialPortName = "COM51";
-const thingSpeakAPIKey = "DVDTVSXTQFY8QZXT";
+const baudRate = 1200;
+const serialPortName = '/dev/ttyACM0';
+const thingSpeakAPIKey = "FOJQUWVWCX7IHVU1";
 /*******************************************************************/
 
 
 /*******************************************************************/
 /*** Gateway code ***/
 /*******************************************************************/
-const SerialPort = require("serialport");
+const {SerialPort} = require('serialport');
 const https = require('https');
 
 var discard = false;
 
-const port = new SerialPort(serialPortName, {  
-    baudRate: 1200
-});
+const params = { path: serialPortName, baudRate: baudRate };
+
+const port = new SerialPort(params)
 
 function tx(buff) {
     port.write(Buffer.from([0xaa, 0x55, 0xc3, 0x3c, buff.length]));
@@ -75,6 +76,7 @@ function handleRx(buff) {
             });
         }
     } else if (buff[0] == 0x02) {
+        console.log('Connection OK', buff);
         txResponse(0x82);
         discard = false;
     } else {
