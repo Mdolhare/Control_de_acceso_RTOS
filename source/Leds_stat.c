@@ -2,7 +2,7 @@
 #include "SysTick.h"
 #include "gpio.h"
 #include "Leds_stat_board.h"
-
+#include "tick.h"
 
 //Interrupcion periodica para prender los leds de status
 static void Write_leds_PISR(void);
@@ -26,8 +26,8 @@ void Leds_Stat_Init (void)
 {
 	gpioMode(STAT_0, OUTPUT);
 	gpioMode(STAT_1, OUTPUT);
-	SysTick_Init();
-	SysTick_Add(Write_leds_PISR);
+
+	tickAdd(Write_leds_PISR);
 	gpioWrite(STAT_0, LOW);
 	gpioWrite(STAT_1, LOW);
 	All_leds_stat_off();

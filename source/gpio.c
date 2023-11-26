@@ -9,7 +9,6 @@
 
 #include "gpio.h"
 #include "../SDK/CMSIS/MK64F12.h"
-#include "hardware.h"
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
@@ -176,6 +175,8 @@ static void port_IQR_handler(uint32_t port)
 	IQRs[port]();
 }
 
+
+
 __ISR__ PORTA_IRQHandler(void)
 {
 	CLEAR_ISF_PORT(PORTA);
@@ -183,22 +184,13 @@ __ISR__ PORTA_IRQHandler(void)
 }
 __ISR__ PORTB_IRQHandler(void)
 {
-	gpioWrite(PORTNUM2PIN(PE,26),LOW);
-
 	CLEAR_ISF_PORT(PORTB);
 	port_IQR_handler(PB);
-	gpioWrite(PORTNUM2PIN(PE,26),HIGH);
-
 }
 __ISR__ PORTC_IRQHandler(void)
 {
-	gpioWrite(PORTNUM2PIN(PE,26),LOW);
-
 	CLEAR_ISF_PORT(PORTC);
 	port_IQR_handler(PC);
-
-	gpioWrite(PORTNUM2PIN(PE,26),HIGH);
-
 }
 __ISR__ PORTD_IRQHandler(void)
 {

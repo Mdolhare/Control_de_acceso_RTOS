@@ -1,8 +1,8 @@
 #include "Encoder.h"
-#include "SysTick.h"
+//#include "SysTick.h"
 #include "gpio.h"
 #include "Encoder_config.h"
-
+#include "tick.h"
 
 //Interrupcion en caso de giro del encoder
 static void PIN_AB(void);
@@ -37,8 +37,9 @@ void DRV_Enc_Init (void)
 	gpioFILT(PIN_A,0b11111);
 	gpioFILT(PIN_B,0b11111);
 
-	SysTick_Init();
-	SysTick_Add(DRV_PISR);
+	/*SysTick_Init();
+	SysTick_Add(DRV_PISR);*/
+	tickAdd(DRV_PISR);
 	vueltas = 0;
 	bot = 0;
 	val_prev = (gpioRead(PIN_A)<<1)+ gpioRead(PIN_B);

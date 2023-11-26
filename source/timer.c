@@ -1,5 +1,5 @@
 #include "SysTick.h"
-
+#include "tick.h"
 void timerPISR(void);
 
 static uint32_t timeSaved;
@@ -10,8 +10,8 @@ static bool flag_init = false;
 void timerInit(uint32_t time_) {
 	timeSaved = time_;
 	speed = 0;//*(TIME_LOAD/SYSTICK_ISR_FREQUENCY_MHZ);
-	SysTick_Init();
-	SysTick_Add(timerPISR);
+
+	tickAdd(timerPISR);
 }
 
 void setTimeAndInit(uint32_t time){

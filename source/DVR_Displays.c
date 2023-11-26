@@ -11,7 +11,7 @@
 #include "SysTick.h"
 #include "board_leds.h"
 #include <stdbool.h>
-
+#include "tick.h"
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
@@ -106,10 +106,13 @@ void ledsInit(){
 	newDisp_flag = 0;
 	disp_to_blink = D0;
 
-	SysTick_Init();
+	/*SysTick_Init();
 	SysTick_Add(showData);
 	SysTick_Add(blink);
-	SysTick_Add(brillo);
+	SysTick_Add(brillo);*/
+	tickAdd(showData);
+	tickAdd(blink);
+	tickAdd(brillo);
 }
 
 void writeDisp(uint8_t numero, uint8_t digito){

@@ -73,8 +73,9 @@ void cardReaderInit(void) {
 		GPIO_IRQ_MODE_FALLING_EDGE,
 		cardReaderISR
 	);
-	SysTick_Init();
-	SysTick_Add(cardReaderPISR);
+	/*SysTick_Init();
+	SysTick_Add(cardReaderPISR);*/
+	tickAdd(cardReaderPISR);
 	gpioMode(PORTNUM2PIN(PE,26),OUTPUT);
 	gpioWrite(PORTNUM2PIN(PE,26),HIGH);
 }

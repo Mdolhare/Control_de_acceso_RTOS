@@ -42,14 +42,14 @@ typedef void (*pinIrqFun_t)(void);
  * @brief Initialize SysTic driver
  * @return Initialization succeed
  */
-bool SysTick_Init (void);
+//bool SysTick_Init (void);
 
 /*
  * @brief carga funcion a ejecutarse en cada tick
  * @param funcallback Function to be call every SysTick
  * @return registration succeed
  */
-bool SysTick_Add(pinIrqFun_t funcallback);
+//bool SysTick_Add(pinIrqFun_t funcallback);
 
 /*******************************************************************************
  ******************************************************************************/
