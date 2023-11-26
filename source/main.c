@@ -48,14 +48,14 @@
 #define LED_R_TOGGLE()       (LED_R_GPIO->PTOR |= (1 << LED_R_PIN))
 
 /* Task Start */
-#define TASKSTART_STK_SIZE 		512u
-#define TASKSTART_PRIO 			2u
+#define TASKSTART_STK_SIZE 		1024u
+#define TASKSTART_PRIO 			3u
 static OS_TCB TaskStartTCB;
 static CPU_STK TaskStartStk[TASKSTART_STK_SIZE];
 
 #define TASKCLOUD_STK_SIZE			256u
 #define TASKCLOUD_STK_SIZE_LIMIT	(TASKCLOUD_STK_SIZE / 10u)
-#define TASKCLOUD_PRIO              3u
+#define TASKCLOUD_PRIO              2u
 
 OS_TCB Task_Cloud_TCB;
 CPU_STK Task_Cloud_Stk[TASKCLOUD_STK_SIZE];
@@ -73,7 +73,8 @@ static OS_SEM semTest;
 
 /* Queue */
 
-
+#define QUEUE_SIZE 10
+static OS_Q queue;
 
 enum fm1_states{INITIAL, MENU, GET_ID, CHECK_ID, GET_PIN, CHECK_PIN, TRY_AGAIN, OK, NOT_OK, HOLD, ERASE_MENU, INTENSITY_MENU};
 enum fm2_states{NONE, ENCODER, TARJETA};
@@ -84,8 +85,9 @@ enum go_back_flags{NO_BOTON, BOTON_BACK, BOTON_NUM};
 typedef struct User {
   uint64_t ID;
   uint64_t PIN;
-  //bool block;
   int counter_block;
+  bool in;
+  int floor;
 } User;
 
 
@@ -204,47 +206,18 @@ static void ID_to_disp(uint8_t * disp_show, uint64_t * reg );
 static void PIN_to_disp(uint8_t * disp_show, uint8_t simbol );
 
 
+static int defineFloor(uint64_t ID);
+
+
 static int8_t counter = 0;
-static int8_t counter_users = 2;
+static int8_t counter_users = 6;
 static bool tarjeta_ID = false;
 
 
 
 
 
-/*static void Task2(void *p_arg) {
-    (void)p_arg;
-    OS_ERR os_err;
-    char msg = 'R';
-    while (1) {
-        OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &os_err);
-        OSQPost (&queue, (void*)&msg, sizeof(void), OS_OPT_POST_FIFO, &os_err);
-        //LED_R_TOGGLE();
-    }
-}
 
-static void Task3(void *p_arg) {
-    (void)p_arg;
-    OS_ERR os_err;
-    char* p_msg;
-    OS_MSG_SIZE p_size;
-
-    while (1) {
-    	p_msg = OSQPend(&queue, 0, OS_OPT_PEND_BLOCKING, &p_size, NULL, &os_err);
-
-    	switch(*p_msg) {
-    		case 'G':
-    			LED_G_TOGGLE();
-    		break;
-    		case 'B':
-				LED_B_TOGGLE();
-			break;
-    		case 'R':
-				LED_R_TOGGLE();
-			break;
-    	}
-    }
-}*/
 
 
 static void TaskStart(void *p_arg) {
@@ -268,7 +241,7 @@ static void TaskStart(void *p_arg) {
      OSTaskCreate(&Task_Cloud_TCB, 			//tcb
                    "Task Cloud",		//name
 				   	Task_Cloud,			//func
-                    0u,					//arg
+                    &queue,					//arg
                     TASKCLOUD_PRIO,			//prio
                    &Task_Cloud_Stk[0u],			//stack
                     TASKCLOUD_STK_SIZE_LIMIT,	//stack limit
@@ -288,19 +261,58 @@ static void TaskStart(void *p_arg) {
 	bool ok;
 	int ID_status;
 	int PIN_status;
+
+
 	User one;
-	one.ID = 60612684;
-	one.PIN = 9876;
+	one.ID = 46605701;
+	one.PIN = 11111;
 	users[1] = one;
 	users[1].counter_block = false;
+	users[1].floor = 1;
+	users[1].in = false;
 
 	User two;
 	two.ID = 63913004;
-	two.PIN = 12345;
+	two.PIN = 22222;
 	users[2] = two;
 	users[2].counter_block = false;
+	users[2].floor = 1;
+	users[2].in = false;
 
-	int msg = 1;
+	User three;
+	three.ID = 45176601;
+	three.PIN = 33333;
+	users[3] = three;
+	users[3].counter_block = false;
+	users[3].floor = 2;
+	users[3].in = false;
+
+	User four;
+	four.ID = 37159500;
+	four.PIN = 44444;
+	users[4] = four;
+	users[4].counter_block = false;
+	users[4].floor = 2;
+	users[4].in = false;
+
+	User five;
+	five.ID = 60612684;
+	five.PIN = 55555;
+	users[5] = five;
+	users[5].counter_block = false;
+	users[5].floor = 3;
+	users[5].in = false;
+
+	User six;
+	six.ID = 80000606;
+	six.PIN = 66666;
+	users[6] = six;
+	users[6].counter_block = false;
+	users[6].floor = 3;
+	users[6].in = false;
+
+
+	int msg = 0;
 
 	int last_state = INITIAL;
 	uint8_t menu_data[4];
@@ -515,21 +527,7 @@ static void TaskStart(void *p_arg) {
     			break;
 
     		case INTENSITY_MENU:
-    			//press_button = get_boton();//get button status
 
-    			/*uint8_t intense = (uint8_t) get_paso(); //get number encode
-
-    			if(intense > 0 &&  intense < 11)
-    						{
-    							fm1_state = MENU;
-    							//setIntensidad(intense);
-    						}
-    						else
-    						{
-    							//show display intensidad no válida
-    							fm1_state = INTENSITY_MENU;
-    						}
-    	*/
     			setDigitDisp(APAGADO,APAGADO,APAGADO,intensidad);
     			blinkDisp(D3);
     			intensidad += get_paso();
@@ -708,9 +706,10 @@ static void TaskStart(void *p_arg) {
     			stopBlink();
     			setDigitDisp(LETRA_P,LETRA_A,5,LETRA_E);
 
-    			OSQPost (&queue, (void*)&msg, sizeof(void), OS_OPT_POST_FIFO, &os_err);
+
+    			//OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &os_err);
     			if(inicio_temp==0){
-    				setTimeAndInit(5000);
+    				setTimeAndInit(2000);
     				inicio_temp = 1;
     			}
 
@@ -718,6 +717,8 @@ static void TaskStart(void *p_arg) {
     				//sin tiempo
     				Turn_off_led_stat(STAT_D1); //D3
     				inicio_temp = 0;
+    				msg = defineFloor(ID);
+    				OSQPost (&queue, (void*)&msg, sizeof(void), OS_OPT_POST_FIFO, &os_err);
     				fm1_state = INITIAL;
     			}
 
@@ -852,7 +853,7 @@ static int get_ID(uint64_t* ID, uint8_t* disp_show, int* go_back)
        *go_back = 0;
        int press_button = 0;
        int ID_full = NO_FULL;
-       static int8_t number = 0; //HABRÍA QUE VER QUÉ TIPO DE DATO ME MANDAN LOS DRIVERS
+       static int8_t number = 0;
 
        if (number_tarjeta_status == CARD_ACCEPTED)
        {
@@ -987,6 +988,7 @@ static bool check_PIN(uint64_t PIN, User* user, bool new_user_flag){
 			if (users[i].PIN == PIN) //Encuentra si hay un ID existente con el ingresado
 			{
 				correct = true;
+				users[i].in =!users[i].in;
 				break;
 			}
 		}
@@ -1103,3 +1105,40 @@ static void setDigitDisp(uint8_t d0,uint8_t d1,uint8_t d2,uint8_t d3){
 	writeDisp(d3,D3);
 }
 
+static int defineFloor(uint64_t ID)
+{
+	int i = 0;
+	int j = 0;
+	static int floors[3] = {1,2,3};
+	for ( i = 1; i <counter_users+1; i++)
+	{
+		if(users[i].ID == ID)
+		{
+			j = users[i].floor;
+				 if(users[i].in)
+				 {
+					 if(floors[j-1] == j)
+					 {
+						 floors[j-1] = 3 + j ;
+					 }
+					 else if(floors[j-1]== 3 + j)
+					 {
+						 floors[j-1]+= 3;
+					 }
+				 }
+				 else
+				 {
+					 if(floors[j-1] == 3 + j)
+					 {
+						 floors[j-1] = j;
+					 }
+					 else if(floors[j-1]== j + 6)
+					 {
+						 floors[j-1] -= 3;
+					 }
+				 }
+		}
+	}
+	return floors[j-1];
+
+}

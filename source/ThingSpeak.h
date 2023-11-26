@@ -15,9 +15,8 @@
 #include "gpio.h"
 #include "board.h"
 /* Task Cloud*/
-#define QUEUE_SIZE 10
 
-static OS_Q queue;
+#define QUEUE_SIZE 10
 void Task_Cloud(void *p_arg);
 #endif // _THINGSPEAK_H_
 

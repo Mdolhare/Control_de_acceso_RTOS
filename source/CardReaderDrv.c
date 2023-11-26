@@ -12,6 +12,7 @@
 #include "SysTick.h"
 #include "gpio.h"
 #include "board.h"
+#include "tick.h"
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
@@ -76,8 +77,8 @@ void cardReaderInit(void) {
 	/*SysTick_Init();
 	SysTick_Add(cardReaderPISR);*/
 	tickAdd(cardReaderPISR);
-	gpioMode(PORTNUM2PIN(PE,26),OUTPUT);
-	gpioWrite(PORTNUM2PIN(PE,26),HIGH);
+	//gpioMode(PORTNUM2PIN(PE,26),OUTPUT);
+	//gpioWrite(PORTNUM2PIN(PE,26),HIGH);
 }
 
 /*
