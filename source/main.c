@@ -72,8 +72,7 @@ static OS_SEM semTest;
 
 
 /* Queue */
-#define QUEUE_SIZE 10
-static OS_Q queue;
+
 
 
 enum fm1_states{INITIAL, MENU, GET_ID, CHECK_ID, GET_PIN, CHECK_PIN, TRY_AGAIN, OK, NOT_OK, HOLD, ERASE_MENU, INTENSITY_MENU};
@@ -301,7 +300,7 @@ static void TaskStart(void *p_arg) {
 	users[2] = two;
 	users[2].counter_block = false;
 
-
+	int msg = 1;
 
 	int last_state = INITIAL;
 	uint8_t menu_data[4];
@@ -709,6 +708,7 @@ static void TaskStart(void *p_arg) {
     			stopBlink();
     			setDigitDisp(LETRA_P,LETRA_A,5,LETRA_E);
 
+    			OSQPost (&queue, (void*)&msg, sizeof(void), OS_OPT_POST_FIFO, &os_err);
     			if(inicio_temp==0){
     				setTimeAndInit(5000);
     				inicio_temp = 1;
@@ -721,19 +721,7 @@ static void TaskStart(void *p_arg) {
     				fm1_state = INITIAL;
     			}
 
-    	/*
-    			if(new_user_flag)
-    			{
-    				new_user_flag = 0;
-    				//MOSTRAR EN DISPLAY QUE SE CREO CORRECTAMENTE
-    			}
-    			else if(!new_user_flag)
-    			{
-    				fm1_state = INITIAL;
-    				//driver Status leds on por 5 segundos
-    				//timer para 5 seg
-    			}
-    	*/
+
     		break;
     		case NOT_OK: 		//no sale de NOT_OK
     			if(new_user_flag)
