@@ -13,6 +13,7 @@
 
 #include "board.h"
 
+
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
@@ -42,12 +43,15 @@ static cola_t txBuffer[UART_CANT_IDS];
 static cola_t rxBuffer[UART_CANT_IDS];
 
 
+static OS_SEM* semaphores[UART_CANT_IDS];
+static OS_ERR err;
+
 /*******************************************************************************
  *******************************************************************************
                         GLOBAL FUNCTION DEFINITIONS
  *******************************************************************************
  ******************************************************************************/
-void uartInit (uint8_t id, uart_cfg_t config)
+void uartInit (uint8_t id, uart_cfg_t config, OS_SEM* semaphore_ptr)
 {
 	PCR_Type* ptr_pcr_rx;
 	PCR_Type* ptr_pcr_tx;
@@ -136,6 +140,7 @@ void uartInit (uint8_t id, uart_cfg_t config)
 		//ptr_uart->RWFIFO = 1;
 		colaInit(&txBuffer[id]);
 		colaInit(&rxBuffer[id]);
+		semaphores[id] = semaphore_ptr;
 	}
 }
 
@@ -241,6 +246,7 @@ static void UART_IQR_handler(uint8_t id) {
 	if((uart_base[id]->S1)& UART_S1_RDRF_MASK) {
 		if(rxBuffer[id].count < Q_SIZE-1)
 			colaPush(&rxBuffer[id], (unsigned const char)uart_base[id]->D);
+			OSSemPost(semaphores[id], OS_OPT_POST_ALL, &err);
 		//else //ocurre error, se va a pisar data en el buffer circuilar
 			//uart_base[id]->D = 0;
 	}

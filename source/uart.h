@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <os.h>
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
@@ -50,7 +51,7 @@ typedef struct {
  * @param id UART's number
  * @param config UART's configuration (baudrate, parity, etc.)
 */
-void uartInit (uint8_t id, uart_cfg_t config);
+void uartInit (uint8_t id, uart_cfg_t config, OS_SEM* semaphore_ptr);
 
 /**
  * @brief Check if a new byte was received

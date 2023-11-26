@@ -2,7 +2,7 @@
 #include "encoder_app.h"
 #include "board.h"
 #include "Encoder.h"
-#include "CardREaderDrv.h"
+#include "CardReaderDrv.h"
 #include "DVR_Displays.h"
 #include "card_app.h"
 #include "timer.h"
