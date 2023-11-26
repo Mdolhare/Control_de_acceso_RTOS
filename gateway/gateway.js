@@ -2,7 +2,7 @@
 /*** Configuration ***/
 /*******************************************************************/
 const baudRate = 1200;
-const serialPortName = '/dev/ttyACM0';
+const serialPortName = 'COM3';
 const thingSpeakAPIKey = "FOJQUWVWCX7IHVU1";
 /*******************************************************************/
 

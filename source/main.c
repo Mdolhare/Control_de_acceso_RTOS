@@ -1,4 +1,11 @@
-
+/*******************************************************************************
+  @file     +main.c+
+  @brief    +App+
+  @author   +GRUPO 2+
+ ******************************************************************************/
+/*******************************************************************************
+ * INCLUDE HEADER FILES
+ ******************************************************************************/
 #include "encoder_app.h"
 #include "board.h"
 #include "Encoder.h"
@@ -60,12 +67,7 @@ static CPU_STK TaskStartStk[TASKSTART_STK_SIZE];
 OS_TCB Task_Cloud_TCB;
 CPU_STK Task_Cloud_Stk[TASKCLOUD_STK_SIZE];
 
-/* Task 3 */
-#define TASK3_STK_SIZE			256u
-#define TASK3_STK_SIZE_LIMIT	(TASK2_STK_SIZE / 10u)
-#define TASK3_PRIO              4u
-static OS_TCB Task3TCB;
-static CPU_STK Task3Stk[TASK3_STK_SIZE];
+
 
 /* Example semaphore */
 static OS_SEM semTest;
@@ -206,6 +208,20 @@ static void ID_to_disp(uint8_t * disp_show, uint64_t * reg );
 static void PIN_to_disp(uint8_t * disp_show, uint8_t simbol );
 
 
+/**
+ * @brief Determina el piso del usuario ingreso
+ * @param ID id del usuario
+ * @return int:
+ *             1 -> 0 personas en el piso 1
+ *             2 -> 0 personas en el piso 2
+ *             3 -> 0 personas en el piso 3
+ *             4 -> 1 persona en el piso 1
+ *             5 -> 1 persona en el piso 2
+ *             6 -> 1 persona en el piso 3
+ *             7 -> 2 personas en el piso 1
+ *             8 -> 2 personas en el piso 2
+ *             9 -> 2 personas en el piso 3
+ */
 static int defineFloor(uint64_t ID);
 
 
@@ -236,7 +252,7 @@ static void TaskStart(void *p_arg) {
     CPU_IntDisMeasMaxCurReset();
 #endif
 
-    //OS_CPU_SysTickInit((CPU_INT32U)  (100000-1));
+    //Creación de las task para enviar a la nube
 
      OSTaskCreate(&Task_Cloud_TCB, 			//tcb
                    "Task Cloud",		//name
@@ -252,6 +268,8 @@ static void TaskStart(void *p_arg) {
                    (OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                    &os_err);
 
+
+     //PARÁMETROS
 	uint64_t ID = 0;
 	uint64_t PIN = 0;
 	int try = 0;
@@ -262,7 +280,7 @@ static void TaskStart(void *p_arg) {
 	int ID_status;
 	int PIN_status;
 
-
+	//USUARIOS
 	User one;
 	one.ID = 46605701;
 	one.PIN = 11111;
@@ -312,21 +330,22 @@ static void TaskStart(void *p_arg) {
 	users[6].in = false;
 
 
-	int msg = 0;
 
+	int msg = 0;
 	int last_state = INITIAL;
 	uint8_t menu_data[4];
 	bool ingresed_number;
 	int go_back = 0;
 	uint8_t disp_show[4] = { SIM_GUION,  SIM_GUION,  SIM_GUION,  SIM_GUION};
+
+
 	//INICIALIZACIÓN DE LOS DRIVERS
 	ledsInit();
 	DRV_Enc_Init();
 	cardReaderInit();
 	timerInit(0);
 	Leds_Stat_Init();
-	//writeNum(1234);
-	//setIntensidad(5);
+
 
 	int inicio_temp = 0;
 	int menu_option=0;
@@ -451,7 +470,7 @@ static void TaskStart(void *p_arg) {
     			break;
     		case ERASE_MENU:
 
-    			setDigitDisp(1,LETRA_B,SIM_VOLVER,LETRA_C); //CAMBIAR B POR A
+    			setDigitDisp(1,LETRA_B,SIM_VOLVER,LETRA_C);
     			if (delete_option < 4)
     			{
     				delete_option += get_paso();
@@ -700,14 +719,11 @@ static void TaskStart(void *p_arg) {
     		case TRY_AGAIN:
     		break;
     		case OK:
-    		//encender led
 
     			Write_Led_stat(STAT_D1); //pestillo D3
     			stopBlink();
     			setDigitDisp(LETRA_P,LETRA_A,5,LETRA_E);
 
-
-    			//OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &os_err);
     			if(inicio_temp==0){
     				setTimeAndInit(1000);
     				inicio_temp = 1;
@@ -724,15 +740,15 @@ static void TaskStart(void *p_arg) {
 
 
     		break;
-    		case NOT_OK: 		//no sale de NOT_OK
+    		case NOT_OK:
     			if(new_user_flag)
     			{
 
-    				//MOSTRAR EN DISPLAY QUE SE CREO INCORRECTAMENTE
+    				//No agregamos esa funcionalidad
     			}
     			else if(!new_user_flag)
     			{
-    				//writeNum(8888); //error
+
     				stopBlink();
     				if(last_state == CHECK_ID || tarjeta_ID)
     				{
@@ -774,7 +790,7 @@ static void TaskStart(void *p_arg) {
     				}
 
 
-    				//Indicar que no existe el usuario indicado  por display
+
     			}
     		break;
     		case HOLD:
@@ -814,7 +830,7 @@ int main(void) {
     /* Create semaphore */
     OSSemCreate(&semTest, "Sem Test", 0u, &err);
 
-
+    //Creamos la Queue
     OSQCreate(&queue, "queue", (OS_MSG_QTY)QUEUE_SIZE, &err);
 
 
