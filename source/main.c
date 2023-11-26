@@ -709,7 +709,7 @@ static void TaskStart(void *p_arg) {
 
     			//OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &os_err);
     			if(inicio_temp==0){
-    				setTimeAndInit(2000);
+    				setTimeAndInit(1000);
     				inicio_temp = 1;
     			}
 
