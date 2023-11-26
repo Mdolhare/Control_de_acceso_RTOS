@@ -8,7 +8,7 @@
 enum cases {PISO_1_1=1, PISO_2_1, PISO_3_1, PISO_1_2, PISO_2_2, PISO_3_2, PISO_1_3, PISO_2_3, PISO_3_3};
 
 static unsigned char msg[MSG_LEN] = {
-	0xAA, 0x55, 0xC3, 0x3C, 0x01, 0x07,
+	0xAA, 0x55, 0xC3, 0x3C, 0x07, 0x01,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
@@ -37,39 +37,39 @@ void Task_Cloud(void *p_arg) {
 		switch(*p_msg) {
 
 			case PISO_1_1:
-				msg[MSG_LEN-4]=0;
+				msg[MSG_LEN-6]=0;
 			break;
 
 			case PISO_2_1:
-				msg[MSG_LEN-2]=0;
+				msg[MSG_LEN-4]=0;
 			break;
 
 			case PISO_3_1:
-				msg[MSG_LEN]=0;
+				msg[MSG_LEN-2]=0;
 			break;
 
 			case PISO_1_2:
-				msg[MSG_LEN-4]=1;
+				msg[MSG_LEN-6]=1;
 			break;
 
 			case PISO_2_2:
-				msg[MSG_LEN-2]=1;
+				msg[MSG_LEN-4]=1;
 			break;
 
 			case PISO_3_2:
-				msg[MSG_LEN]=1;
+				msg[MSG_LEN-2]=1;
 			break;
 
 			case PISO_1_3:
-				msg[MSG_LEN-4]=2;
+				msg[MSG_LEN-6]=2;
 			break;
 
 			case PISO_2_3:
-				msg[MSG_LEN-2]=2;
+				msg[MSG_LEN-4]=2;
 			break;
 
 			case PISO_3_3:
-				msg[MSG_LEN]=2;
+				msg[MSG_LEN-2]=2;
 			break;
 
 			default: break;
