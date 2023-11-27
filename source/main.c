@@ -17,8 +17,9 @@
 #include "hardware.h"
 #include "tick.h"
 #include "ThingSpeak.h"
+#include "keepAlive.h"
 
-#include  <os.h>
+#include <os.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -63,21 +64,34 @@ static CPU_STK TaskStartStk[TASKSTART_STK_SIZE];
 #define TASKCLOUD_STK_SIZE			256u
 #define TASKCLOUD_STK_SIZE_LIMIT	(TASKCLOUD_STK_SIZE / 10u)
 #define TASKCLOUD_PRIO              2u
-
 OS_TCB Task_Cloud_TCB;
 CPU_STK Task_Cloud_Stk[TASKCLOUD_STK_SIZE];
+
+#define TASKKEEPALIVE_STK_SIZE			256u
+#define TASKKEEPALIVE_STK_SIZE_LIMIT	(TASKKEEPALIVE_STK_SIZE / 10u)
+#define TASKKEEPALIVE_PRIO              2u
+OS_TCB Task_KeepAlive_TCB;
+CPU_STK Task_KeepAlive_Stk[TASKKEEPALIVE_STK_SIZE];
+
+
 
 
 
 /* Example semaphore */
 static OS_SEM semTest;
-
+static OS_SEM semCom;
 
 /* Queue */
 
 #define QUEUE_SIZE 10
 static OS_Q queue;
 static OS_Q queue_encoder;
+
+/* mutex */
+static OS_MUTEX mutex;
+
+
+
 enum fm1_states{INITIAL, MENU, GET_ID, CHECK_ID, GET_PIN, CHECK_PIN, TRY_AGAIN, OK, NOT_OK, HOLD, ERASE_MENU, INTENSITY_MENU};
 enum fm2_states{NONE, ENCODER, TARJETA};
 enum reg_status {FULL, NO_FULL, MISTAKE, GO_BACK, CHECK};
@@ -267,6 +281,20 @@ static void TaskStart(void *p_arg) {
                     0u,
                    (OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                    &os_err);
+
+     OSTaskCreate(&Task_Cloud_TCB, 			//tcb
+					"Task Keep Alive",		//name
+					Task_KeepAlive,			//func
+					 &queue,					//arg
+					 TASKKEEPALIVE_PRIO,			//prio
+					&Task_KeepAlive_Stk[0u],			//stack
+					 TASKKEEPALIVE_STK_SIZE_LIMIT,	//stack limit
+					 TASKKEEPALIVE_STK_SIZE,		//stack size
+					 0u,
+					 0u,
+					 0u,
+					(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+					&os_err);
 
 
      //PARÁMETROS
@@ -838,9 +866,19 @@ int main(void) {
 
     /* Create semaphore */
     OSSemCreate(&semTest, "Sem Test", 0u, &err);
+    OSSemCreate(&semCom, "Sem Com", 0u, &err);
+
+    Task_Cloud_Set_Semaphore(&semCom);
+    Task_KeepAlive_Set_Semaphore(&semCom);
 
     //Creamos la Queue
     OSQCreate(&queue, "queue", (OS_MSG_QTY)QUEUE_SIZE, &err);
+
+    /* Crear mutex */
+    OSMutexCreate(&mutex, "mutex", &err);
+
+    Task_Cloud_Set_Mutex(&mutex);
+    Task_KeepAlive_Set_Mutex(&mutex);
 
     OSQCreate(&queue_encoder, "queue_encoder", (OS_MSG_QTY)QUEUE_SIZE, &err);
 
