@@ -1052,15 +1052,20 @@ static bool check_PIN(uint64_t PIN, User* user, bool new_user_flag){
 	}
 	else if (!new_user_flag)
 	{
+		if (user->PIN == PIN)
+		{
+			correct = true;
+			user->in =!(user->in);
+		}
+		/*
 		for (int i = 1; i < counter_users+1; i++)
 		{
 			if (users[i].PIN == PIN) //Encuentra si hay un ID existente con el ingresado
 			{
-				correct = true;
-				users[i].in =!users[i].in;
+
 				break;
 			}
-		}
+		}*/
 	}
 	return correct;
 }

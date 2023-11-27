@@ -69,7 +69,7 @@ void Task_KeepAlive(void* p_arg) {
 	char placeholder;
 
 	while(1) {
-		OSTimeDlyHMSM(0u, 2u, 0u, 0u, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		OSTimeDlyHMSM(0u, 0u, 10u, 0u, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
 		OSMutexPend(mutex_ptr,             /* (1) Pointer to mutex                           */
 					0,                   /*     Wait up until this time for the mutex      */

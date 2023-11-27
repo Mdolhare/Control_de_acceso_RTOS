@@ -104,11 +104,12 @@ void Task_Cloud(void *p_arg) {
 			uartWriteMsg2(msg[i]);
 		}
 		char msg2;
-		for(int i=0; i<RX_LEN; i++) {
-			OSSemPend(&semaphore, 0, OS_OPT_PEND_BLOCKING, NULL, &os_err);
+		for(int i=0; i<RX_LEN ; i++) {
+			OSSemPend(semaphore, 0, OS_OPT_PEND_BLOCKING, NULL, &os_err);
 			msg2 = uartReadMsg(UART_0, &rx, 1);
-		}
 
+		}
+		//OSSemSet(&semaphore, 0, &os_err);
 		OSMutexPost(mutex_ptr,             /* (3) Pointer to mutex                           */
 					OS_OPT_POST_NONE,
 					&os_err);                /*     Pointer to Error returned                  */

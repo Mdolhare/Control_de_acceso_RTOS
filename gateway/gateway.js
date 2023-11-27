@@ -3,7 +3,7 @@
 /*******************************************************************/
 const baudRate = 1200;
 const serialPortName = 'COM3';
-const thingSpeakAPIKey = "FOJQUWVWCX7IHVU1";
+const thingSpeakAPIKey = "GB60SANB6JXS7OC4";
 /*******************************************************************/
 
 

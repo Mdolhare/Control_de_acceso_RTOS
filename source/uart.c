@@ -245,8 +245,10 @@ static void UART_IQR_handler(uint8_t id) {
 	//Interrupcion de recepcion
 	if((uart_base[id]->S1)& UART_S1_RDRF_MASK) {
 		if(rxBuffer[id].count < Q_SIZE-1)
+		{
 			colaPush(&rxBuffer[id], (unsigned const char)uart_base[id]->D);
 			OSSemPost(semaphores[id], OS_OPT_POST_ALL, &err);
+		}
 		//else //ocurre error, se va a pisar data en el buffer circuilar
 			//uart_base[id]->D = 0;
 	}
