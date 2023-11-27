@@ -23,12 +23,14 @@ static int bot;
 //Variable que se utilizara para contar las rotaciones del encoder
 static int val_prev;
 
+static OS_Q* queue_encoder_1;
 
 /*******************************************************************************
  * INICIALIZACION
  ******************************************************************************/
-void DRV_Enc_Init (void)
+void DRV_Enc_Init (OS_Q* queue_encoder)
 {
+	queue_encoder_1 =  queue_encoder;
 	gpioMode(PIN_A, INPUT);
 	gpioMode(PIN_B, INPUT);
 	gpioMode(BOTON, INPUT);
@@ -122,16 +124,26 @@ void PIN_AB(void)
 	gpioWrite(PORTNUM2PIN(PE,26),HIGH);
 }
 
+
 //Interrupcion periodica que cuenta la cantidad de veces que se apreto el boton
 void DRV_PISR(void)
 {
 	static int val_prev;
 	int val_new = gpioRead(BOTON);
 
+	OS_ERR os_err;
 	if((val_new != val_prev) && val_new == BOT_ACTIVE)
 	{
 		bot++;
 	}
 	val_prev= val_new;
+	char msg = get_boton();
+	if(msg)
+	{
+		OSQPost(queue_encoder_1, (void*)(&msg), sizeof(void), OS_OPT_POST_FIFO, &os_err);
+	}
+
 
 }
+
+

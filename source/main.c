@@ -77,7 +77,7 @@ static OS_SEM semTest;
 
 #define QUEUE_SIZE 10
 static OS_Q queue;
-
+static OS_Q queue_encoder;
 enum fm1_states{INITIAL, MENU, GET_ID, CHECK_ID, GET_PIN, CHECK_PIN, TRY_AGAIN, OK, NOT_OK, HOLD, ERASE_MENU, INTENSITY_MENU};
 enum fm2_states{NONE, ENCODER, TARJETA};
 enum reg_status {FULL, NO_FULL, MISTAKE, GO_BACK, CHECK};
@@ -337,11 +337,11 @@ static void TaskStart(void *p_arg) {
 	bool ingresed_number;
 	int go_back = 0;
 	uint8_t disp_show[4] = { SIM_GUION,  SIM_GUION,  SIM_GUION,  SIM_GUION};
-
+	OS_MSG_SIZE p_size;
 
 	//INICIALIZACIÓN DE LOS DRIVERS
 	ledsInit();
-	DRV_Enc_Init();
+	DRV_Enc_Init(&queue_encoder);
 	cardReaderInit();
 	timerInit(0);
 	Leds_Stat_Init();
@@ -415,8 +415,13 @@ static void TaskStart(void *p_arg) {
     			}
 
     			blinkDisp(menu_option);
-    			int press_button =  get_boton();//get button status
-    			if(press_button == 1)
+
+    			char* press_buttonc;
+    			char press_button = 0;
+				press_buttonc = OSQPend((OS_Q*) &queue_encoder, 0, OS_OPT_PEND_NON_BLOCKING, &p_size, NULL, &os_err);
+				press_button = *press_buttonc;
+    			//int press_button =  get_boton();//get button status
+    			if(press_button > 1)
     			{
     				if(menu_option == NUM)
     				{
@@ -485,8 +490,10 @@ static void TaskStart(void *p_arg) {
     			}
 
     			blinkDisp(delete_option);
-
-    			press_button = get_boton();//get button status
+				press_button = 0;
+    			press_buttonc = OSQPend((OS_Q*) &queue_encoder, 0, OS_OPT_PEND_NON_BLOCKING, &p_size, NULL, &os_err);
+    			press_button = *press_buttonc;
+    			//press_button = get_boton();//get button status
     			if(press_button != 0)
     			{
     				if(delete_option == ALL_DIGITS)
@@ -556,8 +563,10 @@ static void TaskStart(void *p_arg) {
     			if(intensidad < MIN_INTENS){
     				intensidad = MAX_INTENS;
     			}
-
-    			press_button = get_boton();//get button status
+    			press_button = 0;
+    			press_buttonc = OSQPend((OS_Q*) &queue_encoder, 0, OS_OPT_PEND_NON_BLOCKING, &p_size, NULL, &os_err);
+    			press_button = *press_buttonc;
+    			//press_button = get_boton();//get button status
     			if(press_button != 0)
     			{
     				//setIntensidad(intensidad);
@@ -833,7 +842,7 @@ int main(void) {
     //Creamos la Queue
     OSQCreate(&queue, "queue", (OS_MSG_QTY)QUEUE_SIZE, &err);
 
-
+    OSQCreate(&queue_encoder, "queue_encoder", (OS_MSG_QTY)QUEUE_SIZE, &err);
 
     OSTaskCreate(&TaskStartTCB,
                  "App Task Start",
@@ -915,12 +924,18 @@ static int get_ID(uint64_t* ID, uint8_t* disp_show, int* go_back)
 
    static uint8_t get_digit(uint64_t * reg ,int8_t * number, uint8_t * disp_show, int * go_back, uint64_t max_num,uint8_t max_dig){
    	uint8_t reg_full = NO_FULL;
-   	int8_t press_button;
+   	//int8_t press_button;
+	OS_MSG_SIZE p_size;
+	char* press_buttonc;
+	char press_button = 0;
+	OS_ERR os_err;
    	if((*number < 11)  && *number >= -1)
 		{
 			*number += get_paso();
-			press_button = get_boton();
-			if(press_button == 1)
+			press_buttonc = OSQPend((OS_Q*) &queue_encoder, 0, OS_OPT_PEND_NON_BLOCKING, &p_size, NULL, &os_err);
+			press_button = *press_buttonc;
+			//press_button = get_boton();
+			if(press_button > 1)
 			{
 
 				if (*number > 0 ) //  -n -n -1231243 -2

@@ -11,7 +11,7 @@
  * INCLUDE HEADER FILES
  ******************************************************************************/
 #include <stdbool.h>
-
+#include <os.h>
 
 /*******************************************************************************
  * FUNCTION PROTOTYPES WITH GLOBAL SCOPE
@@ -20,7 +20,7 @@
 /**
  * @brief Inicializacion
  */
-void DRV_Enc_Init (void);
+void DRV_Enc_Init (OS_Q* queue_encoder);
 
 
 /**

@@ -101,7 +101,7 @@ void Task_Cloud(void *p_arg) {
 			uartReadMsg(UART_0, &rx, 1);
 		}
 
-
+		OSTimeDlyHMSM(0u, 0u, 15u, 0u, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
     }
 }
