@@ -22,7 +22,6 @@
  */
 void DRV_Enc_Init (OS_Q* queue_encoder);
 
-
 /**
  * @brief Devuelve la cantidad de pasos hechos por el encoder y resetea. Un paso
  * del encoder se cuenta una vez que vuelve al estado inicial.

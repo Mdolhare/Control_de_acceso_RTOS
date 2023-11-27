@@ -103,17 +103,17 @@ void Task_Cloud(void *p_arg) {
 			OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &os_err);
 			uartWriteMsg2(msg[i]);
 		}
-
+		char msg2;
 		for(int i=0; i<RX_LEN; i++) {
 			OSSemPend(&semaphore, 0, OS_OPT_PEND_BLOCKING, NULL, &os_err);
-			uartReadMsg(UART_0, &rx, 1);
+			msg2 = uartReadMsg(UART_0, &rx, 1);
 		}
 
 		OSMutexPost(mutex_ptr,             /* (3) Pointer to mutex                           */
 					OS_OPT_POST_NONE,
 					&os_err);                /*     Pointer to Error returned                  */
 
-		OSTimeDlyHMSM(0u, 0u, 15u, 0u, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		//OSTimeDlyHMSM(0u, 0u, 15u, 0u, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
     }
 }

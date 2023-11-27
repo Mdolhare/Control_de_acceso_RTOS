@@ -57,7 +57,7 @@
 
 /* Task Start */
 #define TASKSTART_STK_SIZE 		1024u
-#define TASKSTART_PRIO 			3u
+#define TASKSTART_PRIO 			4u
 static OS_TCB TaskStartTCB;
 static CPU_STK TaskStartStk[TASKSTART_STK_SIZE];
 
@@ -69,7 +69,7 @@ CPU_STK Task_Cloud_Stk[TASKCLOUD_STK_SIZE];
 
 #define TASKKEEPALIVE_STK_SIZE			256u
 #define TASKKEEPALIVE_STK_SIZE_LIMIT	(TASKKEEPALIVE_STK_SIZE / 10u)
-#define TASKKEEPALIVE_PRIO              2u
+#define TASKKEEPALIVE_PRIO              3u
 OS_TCB Task_KeepAlive_TCB;
 CPU_STK Task_KeepAlive_Stk[TASKKEEPALIVE_STK_SIZE];
 
@@ -282,10 +282,10 @@ static void TaskStart(void *p_arg) {
                    (OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                    &os_err);
 
-     OSTaskCreate(&Task_Cloud_TCB, 			//tcb
+     OSTaskCreate(&Task_KeepAlive_TCB, 			//tcb
 					"Task Keep Alive",		//name
 					Task_KeepAlive,			//func
-					 &queue,					//arg
+					 NULL,					//arg
 					 TASKKEEPALIVE_PRIO,			//prio
 					&Task_KeepAlive_Stk[0u],			//stack
 					 TASKKEEPALIVE_STK_SIZE_LIMIT,	//stack limit

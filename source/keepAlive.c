@@ -58,6 +58,10 @@ static OS_SEM* semaphore;
 
 void Task_KeepAlive(void* p_arg) {
 
+	gpioMode(PIN_LED_RED, OUTPUT);
+	gpioMode(PIN_LED_BLUE, OUTPUT);
+	gpioWrite(PIN_LED_RED, 1);
+	gpioWrite(PIN_LED_BLUE, 1);
 	OS_ERR os_err;
 
 	unsigned char caracter;
@@ -65,7 +69,7 @@ void Task_KeepAlive(void* p_arg) {
 	char placeholder;
 
 	while(1) {
-		OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &os_err);
+		OSTimeDlyHMSM(0u, 2u, 0u, 0u, OS_OPT_TIME_HMSM_STRICT, &os_err);
 
 		OSMutexPend(mutex_ptr,             /* (1) Pointer to mutex                           */
 					0,                   /*     Wait up until this time for the mutex      */
@@ -87,14 +91,12 @@ void Task_KeepAlive(void* p_arg) {
 					OS_OPT_POST_NONE,
 					&os_err);                /*     Pointer to Error returned                  */
 
-		if(caracter == 0x02) {
-			gpioWrite(PIN_LED_BLUE, 0);
+		if(caracter == 0x82) {
+			gpioToggle(PIN_LED_BLUE);
 		}
-		else if(caracter == 0x82) {
-			gpioWrite(PIN_LED_BLUE, 1);
-		}
+
 		else {
-			gpioWrite(PIN_LED_RED, 0);
+			gpioToggle(PIN_LED_RED);
 		}
 		caracter = 0;
 
